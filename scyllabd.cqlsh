@@ -1,0 +1,8 @@
+CREATE KEYSPACE users WITH replication = {'class': 'NetworkTopologyStrategy', 'replication_factor' : '1'};
+
+
+CREATE TABLE IF NOT EXISTS users.user (
+  id bigint PRIMARY KEY,
+  name text,
+  email text
+);

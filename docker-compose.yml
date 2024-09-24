@@ -1,0 +1,76 @@
+version: "3.3"
+
+services:
+  users-api:
+    depends_on:
+      - database
+    restart: always
+    build:
+      context: .
+    networks:
+      network-database:
+        ipv4_address: "172.25.0.100"
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 50051:50051
+   
+  database:
+    image: scylladb/scylla:6.0
+    restart: always
+    ports:
+    - 9042:9042
+    expose:
+      - 9042
+    volumes:
+      - db-data:/var/lib/scylla
+    container_name: database
+    networks:
+      network-database:
+        ipv4_address: 172.25.0.200
+
+  database2:
+    depends_on:
+      - database
+    image: scylladb/scylla:6.0
+    restart: always
+    ports:
+    - 9043:9042
+    expose:
+      - 9042
+    volumes:
+      - db-data2:/var/lib/scylla
+    container_name: database2
+    command: --seeds=database
+    networks:
+      network-database:
+        ipv4_address: 172.25.0.201
+
+  database3:
+    depends_on:
+      - database2
+    image: scylladb/scylla:6.0
+    restart: always
+    ports:
+    - 9044:9042
+    expose:
+      - 9042
+    volumes:
+      - db-data3:/var/lib/scylla
+    container_name: database3
+    command: --seeds=database2
+    networks:
+      network-database:
+        ipv4_address: 172.25.0.202
+
+volumes:
+  db-data:
+  db-data2:
+  db-data3:
+
+networks:
+  network-database:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16

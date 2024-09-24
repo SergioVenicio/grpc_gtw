@@ -1,0 +1,133 @@
+syntax = "proto3";
+package userApi;
+option go_package = "./cmd/api/main.go";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+message User {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      required: ["id", "name", "email"]
+    }
+    example: "{\"id\": \"1\", \"name\": \"joe\", \"email\": \"joe@doe.com\"}"
+  };
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message CreateUserRequest {
+  User user = 1;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message GetUserRequest {
+  int32 id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  User user = 1;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+      option (google.api.http) = {
+          post: "/v1/users"
+          body: "user"
+      };
+      option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        responses: {
+          key: "201"
+          value: {
+            description: "User created."
+            schema: {
+              json_schema: {
+                ref: ".userApi.User"
+              }
+            }
+          }
+        }
+      };
+  }
+
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+      option (google.api.http) = {
+          get: "/v1/users/{id}"
+      };
+
+      option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        responses: {
+          key: "200"
+          value: {
+            description: "User Found."
+            schema: {
+              json_schema: {
+                ref: ".userApi.User"
+              }
+            }
+          }
+        }
+      };
+  }
+
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
+      option (google.api.http) = {
+          put: "/v1/users/{user.id}"
+          body: "user"
+      };
+
+      option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        responses: {
+          key: "202"
+          value: {
+            description: "User updated."
+            schema: {
+              json_schema: {
+                ref: ".userApi.User"
+              }
+            }
+          }
+        }
+      };
+  }
+
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
+      option (google.api.http) = {
+          delete: "/v1/users/{id}"
+      };
+
+      option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        responses: {
+          key: "202"
+          value: {
+            description: "User deleted."
+            schema: {
+              json_schema: {
+                ref: ".userApi.User"
+              }
+            }
+          }
+        }
+      };
+  }
+}
