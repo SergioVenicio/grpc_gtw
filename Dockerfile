@@ -11,6 +11,7 @@ FROM alpine:3.20.3
 WORKDIR /build
 COPY --from=builder /app/users ./users
 COPY --from=builder /app/swagger ./swagger
+COPY .env /build/.env
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 50051

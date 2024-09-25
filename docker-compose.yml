@@ -8,15 +8,15 @@ services:
     build:
       context: .
     networks:
-      network-database:
-        ipv4_address: "172.25.0.100"
+      - network-database
     ports:
       - 8080:8080
       - 8081:8081
       - 50051:50051
+    env_file: .env.docker
    
   database:
-    image: scylladb/scylla:6.0
+    image: scylladb/scylla:6.1
     restart: always
     ports:
     - 9042:9042
@@ -24,15 +24,16 @@ services:
       - 9042
     volumes:
       - db-data:/var/lib/scylla
+      - ./scylla/cassandra-rackdc.properties:/etc/scylla/cassandra-rackdc.properties
     container_name: database
+    command: --seeds=database,database2,database3
     networks:
-      network-database:
-        ipv4_address: 172.25.0.200
+      - network-database
 
   database2:
     depends_on:
       - database
-    image: scylladb/scylla:6.0
+    image: scylladb/scylla:6.1
     restart: always
     ports:
     - 9043:9042
@@ -40,16 +41,16 @@ services:
       - 9042
     volumes:
       - db-data2:/var/lib/scylla
+      - ./scylla/cassandra-rackdc.properties:/etc/scylla/cassandra-rackdc.properties
     container_name: database2
-    command: --seeds=database
+    command: --seeds=database,database2,database3
     networks:
-      network-database:
-        ipv4_address: 172.25.0.201
+      - network-database
 
   database3:
     depends_on:
       - database2
-    image: scylladb/scylla:6.0
+    image: scylladb/scylla:6.1
     restart: always
     ports:
     - 9044:9042
@@ -57,12 +58,21 @@ services:
       - 9042
     volumes:
       - db-data3:/var/lib/scylla
+      - ./scylla/cassandra-rackdc.properties:/etc/scylla/cassandra-rackdc.properties
     container_name: database3
-    command: --seeds=database2
+    command: --seeds=database,database2,database3
     networks:
-      network-database:
-        ipv4_address: 172.25.0.202
+      - network-database
 
+  database-init:
+    container_name: scylla-load-keyspace
+    image: scylladb/scylla:6.1
+    volumes:
+      - ./scylla/scylladb.txt:/scylla_scripts/scylladb.txt
+      - ./scylla/initdb.sh:/scylla_scripts/initdb.sh
+    entrypoint: [ "sh", "/scylla_scripts/initdb.sh" ]
+    networks:
+      - network-database
 volumes:
   db-data:
   db-data2:
@@ -70,7 +80,4 @@ volumes:
 
 networks:
   network-database:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.25.0.0/16
+    driver: bridge
