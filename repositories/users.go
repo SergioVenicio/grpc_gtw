@@ -8,7 +8,7 @@ import (
 	"github.com/scylladb/gocqlx/v3/table"
 )
 
-var userMetadata = table.Metadata{
+var UserMetadata = table.Metadata{
 	Name:    "user",
 	Columns: []string{"id", "name", "email"},
 	PartKey: []string{"id"},
@@ -19,15 +19,15 @@ type Users struct {
 }
 
 func (u *Users) Save(newUser models.User) error {
-	return u.db.Save(userMetadata, newUser)
+	return u.db.Save(UserMetadata, newUser)
 }
 
 func (u *Users) Update(newUser models.User) error {
-	return u.db.Update(userMetadata, newUser)
+	return u.db.Update(UserMetadata, newUser)
 }
 
 func (u *Users) Get(id int32) (*models.User, error) {
-	dbUser, err := u.db.Get(userMetadata, models.User{ID: id})
+	dbUser, err := u.db.Get(UserMetadata, models.User{ID: id})
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (u *Users) Get(id int32) (*models.User, error) {
 }
 
 func (u *Users) Delete(id int32) error {
-	err := u.db.Delete(userMetadata, id)
+	err := u.db.Delete(UserMetadata, id)
 	if err != nil {
 		return err
 	}
@@ -43,5 +43,5 @@ func (u *Users) Delete(id int32) error {
 }
 
 func NewUserRepository(s *settings.Settings) *Users {
-	return &Users{database.NewScyllaDB[models.User](s)}
+	return &Users{database.NewScyllaDB[models.User](nil, s)}
 }

@@ -62,9 +62,11 @@ func (s *ScyllaDB[T]) Delete(metadata table.Metadata, id int32) error {
 	return nil
 }
 
-func NewScyllaDB[T interface{}](s *settings.Settings) *ScyllaDB[T] {
-	hosts := strings.Split(s.ScylladbURI, ",")
-	cluster := gocql.NewCluster(hosts...)
+func NewScyllaDB[T interface{}](cluster *gocql.ClusterConfig, s *settings.Settings) *ScyllaDB[T] {
+	if cluster == nil {
+		hosts := strings.Split(s.ScylladbURI, ",")
+		cluster = gocql.NewCluster(hosts...)
+	}
 	cluster.Keyspace = "users"
 	session, err := gocqlx.WrapSession(cluster.CreateSession())
 	if err != nil {
