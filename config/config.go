@@ -1,21 +1,21 @@
-package settings
+package config
 
 import "os"
 
-type Settings struct {
+type Config struct {
 	ScylladbURI        string
 	GRPCServerEndpoint string
 	HTTPServerAddr     string
 	GRPCServerPort     string
 }
 
-func NewSettings() *Settings {
+func NewConfig() *Config {
 	scylladbURI := os.Getenv("SCYLLADB_URI")
 	GRPCServerEndpoint := os.Getenv("GRPC_SERVER_ENDPOINT")
 	HTTPServerAddr := os.Getenv("HTTP_SERVER_ADDR")
 	GRPCServerPort := os.Getenv("GRPC_SERVER_PORT")
 
-	return &Settings{
+	return &Config{
 		ScylladbURI:        scylladbURI,
 		GRPCServerEndpoint: GRPCServerEndpoint,
 		HTTPServerAddr:     HTTPServerAddr,

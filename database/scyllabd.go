@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/SergioVenicio/grpc_gtw/settings"
+	"github.com/SergioVenicio/grpc_gtw/config"
 
 	"github.com/gocql/gocql"
 	"github.com/scylladb/gocqlx/v3"
@@ -62,9 +62,9 @@ func (s *ScyllaDB[T]) Delete(metadata table.Metadata, id int32) error {
 	return nil
 }
 
-func NewScyllaDB[T interface{}](cluster *gocql.ClusterConfig, s *settings.Settings) *ScyllaDB[T] {
+func NewScyllaDB[T interface{}](cluster *gocql.ClusterConfig, cfg *config.Config) *ScyllaDB[T] {
 	if cluster == nil {
-		hosts := strings.Split(s.ScylladbURI, ",")
+		hosts := strings.Split(cfg.ScylladbURI, ",")
 		cluster = gocql.NewCluster(hosts...)
 	}
 	cluster.Keyspace = "users"

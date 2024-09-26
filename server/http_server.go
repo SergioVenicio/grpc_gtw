@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/SergioVenicio/grpc_gtw/config"
 	usersGRPC "github.com/SergioVenicio/grpc_gtw/grpc"
-	"github.com/SergioVenicio/grpc_gtw/settings"
 
 	"github.com/flowchartsman/swaggerui"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func RunGRPCGWServer(s *settings.Settings) {
+func RunGRPCGWServer(cfg *config.Config) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -25,7 +25,7 @@ func RunGRPCGWServer(s *settings.Settings) {
 		runtime.WithForwardResponseOption(setStatus),
 	)
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	err := usersGRPC.RegisterUserServiceHandlerFromEndpoint(ctx, rmux, s.GRPCServerEndpoint, opts)
+	err := usersGRPC.RegisterUserServiceHandlerFromEndpoint(ctx, rmux, cfg.GRPCServerEndpoint, opts)
 	if err != nil {
 		log.Fatalf("failed to register HTTP handlers: %v", err)
 	}
@@ -44,7 +44,7 @@ func RunGRPCGWServer(s *settings.Settings) {
 	mux.Handle("/", rmux)
 
 	log.Println("gRPC-gateway server listening on port", `s.HTTPServerAddr`)
-	if err = http.ListenAndServe(s.HTTPServerAddr, mux); err != nil {
+	if err = http.ListenAndServe(cfg.HTTPServerAddr, mux); err != nil {
 		log.Fatalf("failed to serve http server: %v", err)
 	}
 }

@@ -7,10 +7,10 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/SergioVenicio/grpc_gtw/config"
 	usersGRPC "github.com/SergioVenicio/grpc_gtw/grpc"
 	"github.com/SergioVenicio/grpc_gtw/models"
 	"github.com/SergioVenicio/grpc_gtw/repositories"
-	"github.com/SergioVenicio/grpc_gtw/settings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -24,8 +24,8 @@ type Server struct {
 	users *repositories.Users
 }
 
-func NewServer(s *settings.Settings) *Server {
-	return &Server{users: repositories.NewUserRepository(s)}
+func NewServer(cfg *config.Config) *Server {
+	return &Server{users: repositories.NewUserRepository(cfg)}
 }
 
 func (s *Server) CreateUser(ctx context.Context, req *usersGRPC.CreateUserRequest) (*usersGRPC.CreateUserResponse, error) {
@@ -79,17 +79,17 @@ func setStatus(ctx context.Context, w http.ResponseWriter, m protoreflect.ProtoM
 	return nil
 }
 
-func RunGRPCServer(s *settings.Settings) {
+func RunGRPCServer(cfg *config.Config) {
 	grpcServer := grpc.NewServer()
-	usersGRPC.RegisterUserServiceServer(grpcServer, NewServer(s))
+	usersGRPC.RegisterUserServiceServer(grpcServer, NewServer(cfg))
 	reflection.Register(grpcServer)
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 
-	lis, err := net.Listen("tcp", s.GRPCServerPort)
+	lis, err := net.Listen("tcp", cfg.GRPCServerPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	log.Println("gRPC server listening on port", s.GRPCServerPort)
+	log.Println("gRPC server listening on port", cfg.GRPCServerPort)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve gRPC server: %v", err)
 	}

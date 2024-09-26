@@ -9,6 +9,8 @@ import (
 )
 
 func TestUserModel(t *testing.T) {
+	t.Parallel()
+
 	id := gofakeit.Int32()
 	name := gofakeit.Name()
 	email := gofakeit.Email()

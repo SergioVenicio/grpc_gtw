@@ -1,9 +1,9 @@
 package repositories
 
 import (
+	"github.com/SergioVenicio/grpc_gtw/config"
 	"github.com/SergioVenicio/grpc_gtw/database"
 	"github.com/SergioVenicio/grpc_gtw/models"
-	"github.com/SergioVenicio/grpc_gtw/settings"
 
 	"github.com/scylladb/gocqlx/v3/table"
 )
@@ -42,6 +42,6 @@ func (u *Users) Delete(id int32) error {
 	return nil
 }
 
-func NewUserRepository(s *settings.Settings) *Users {
-	return &Users{database.NewScyllaDB[models.User](nil, s)}
+func NewUserRepository(cfg *config.Config) *Users {
+	return &Users{database.NewScyllaDB[models.User](nil, cfg)}
 }

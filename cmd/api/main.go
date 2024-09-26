@@ -3,19 +3,21 @@ package main
 import (
 	"log"
 
+	"github.com/SergioVenicio/grpc_gtw/config"
 	"github.com/SergioVenicio/grpc_gtw/server"
-	"github.com/SergioVenicio/grpc_gtw/settings"
 
 	"github.com/joho/godotenv"
 )
 
-func main() {
+func init() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+}
 
-	s := settings.NewSettings()
-	go server.RunGRPCGWServer(s)
-	server.RunGRPCServer(s)
+func main() {
+	cfg := config.NewConfig()
+	go server.RunGRPCGWServer(cfg)
+	server.RunGRPCServer(cfg)
 }
