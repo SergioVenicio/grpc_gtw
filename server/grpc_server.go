@@ -79,8 +79,13 @@ func setStatus(ctx context.Context, w http.ResponseWriter, m protoreflect.ProtoM
 	return nil
 }
 
-func RunGRPCServer(cfg *config.Config) {
+func RunGRPCServer(ctx context.Context, cfg *config.Config) {
 	grpcServer := grpc.NewServer()
+	defer func() {
+		grpcServer.GracefulStop()
+		<-ctx.Done()
+	}()
+
 	usersGRPC.RegisterUserServiceServer(grpcServer, NewServer(cfg))
 	reflection.Register(grpcServer)
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())

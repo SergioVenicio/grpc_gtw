@@ -16,11 +16,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func RunGRPCGWServer(cfg *config.Config) {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
+func RunGRPCGWServer(ctx context.Context, cfg *config.Config) {
 	rmux := runtime.NewServeMux(
 		runtime.WithForwardResponseOption(setStatus),
 	)
@@ -43,8 +39,20 @@ func RunGRPCGWServer(cfg *config.Config) {
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(spec)))
 	mux.Handle("/", rmux)
 
-	log.Println("gRPC-gateway server listening on port", `s.HTTPServerAddr`)
-	if err = http.ListenAndServe(cfg.HTTPServerAddr, mux); err != nil {
+	server := http.Server{
+		Addr:    cfg.HTTPServerAddr,
+		Handler: mux,
+	}
+	go func() {
+		<-ctx.Done()
+		log.Println("stoping http server...")
+		if err := server.Shutdown(ctx); err != nil {
+			log.Fatalf("failed to shutdown http server: %v", err)
+		}
+	}()
+
+	log.Println("gRPC-gateway server listening on port", cfg.HTTPServerAddr)
+	if err = server.ListenAndServe(); err != nil {
 		log.Fatalf("failed to serve http server: %v", err)
 	}
 }

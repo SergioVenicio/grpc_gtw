@@ -1,7 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/SergioVenicio/grpc_gtw/config"
 	"github.com/SergioVenicio/grpc_gtw/server"
@@ -18,6 +23,16 @@ func init() {
 
 func main() {
 	cfg := config.NewConfig()
-	go server.RunGRPCGWServer(cfg)
-	server.RunGRPCServer(cfg)
+	ctx := context.Background()
+	ctx, shutdown := context.WithTimeout(ctx, 10*time.Second)
+
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		shutdown()
+	}()
+	go server.RunGRPCGWServer(ctx, cfg)
+	server.RunGRPCServer(ctx, cfg)
+
 }
